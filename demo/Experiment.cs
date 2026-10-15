@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Anthropic;
@@ -8,6 +7,7 @@ using Anthropic.Core;
 using Microsoft.Extensions.AI;
 using ModelContextProtocol;
 using ModelContextProtocol.Client;
+using Spectre.Console;
 
 public static class Experiment
 {
@@ -56,94 +56,89 @@ public static class Experiment
 
     public static async Task RunAsync(string[] args)
     {
-        // if (args is ["--self-check"])
-        // {
-        //     CheckScorer();
-        //     Console.WriteLine("PASS assessment scorer: correct answer, missing fact, extra fact, duplicate fact, invented ETA and malformed shape.");
-        //     await CheckLoopAsync();
-        //     Console.WriteLine("PASS scripted HTTP response -> real MCP call -> tool output -> scored assessment. No live model involved.");
-        //     return;
-        // }
-        
-        if (args.Length is < 1 or > 4)
-            throw new ArgumentException("Usage: evaluate <new-output-directory> [repetitions=3] [model=" + Model + "] [provider=openai|anthropic]");
-        
+        if (args.Length > 4)
+            throw new ArgumentException("Usage: evaluate [tools=granular|focused] [repetitions=3] [model=" + Model + "] [provider=openai|anthropic]");
+
+        var variant = args.ElementAtOrDefault(0) ?? "granular";
+        if (variant is not ("granular" or "focused")) throw new ArgumentException("Tools must be granular or focused.");
+
         var repetitions = args.Length > 1 ? int.Parse(args[1]) : 3;
         if (repetitions is < 1 or > 10) throw new ArgumentOutOfRangeException(nameof(repetitions), "Use 1 to 10 repetitions.");
-        
+
         var provider = args.ElementAtOrDefault(3) ?? "openai";
         if (provider is not ("openai" or "anthropic")) throw new ArgumentException("Provider must be openai or anthropic.");
         if (provider == "anthropic" && args.Length < 3) throw new ArgumentException("Specify an Anthropic model ID.");
-        
+
         var model = args.ElementAtOrDefault(2) ?? Model;
-        
+
         var keyName = provider == "anthropic" ? "ANTHROPIC_API_KEY" : "OPENAI_API_KEY";
         var key = Environment.GetEnvironmentVariable(keyName);
         if (string.IsNullOrWhiteSpace(key)) throw new InvalidOperationException($"Set {keyName} in the environment.");
-        
-        var output = Path.GetFullPath(args[0]);
-        if (Directory.Exists(output)) throw new InvalidOperationException("Use a new output directory to preserve previous runs.");
-        Directory.CreateDirectory(output);
-        
-        using var charClient = provider == "openai"
-            ? new OpenAI.OpenAIClient(key).GetChatClient(model).AsIChatClient()
-            : new AnthropicClient(new ClientOptions(){ApiKey = key}).AsIChatClient(model);
 
-        // await File.WriteAllTextAsync(Path.Combine(output, "manifest.json"), JsonSerializer.Serialize(new
-        // {
-        //     provider, model, repetitions, asOf = Domain.AsOf, createdAt = DateTimeOffset.UtcNow,
-        //     client = "Microsoft.Extensions.AI.IChatClient", traceFormat = "normalized-chat-v1",
-        //     assemblyVersions = new {
-        //         mcp = typeof(McpClient).Assembly.GetName().Version?.ToString(),
-        //         chatAbstractions = typeof(IChatClient).Assembly.GetName().Version?.ToString(),
-        //         adapter = charClient.GetType().Assembly.GetName().Version?.ToString()
-        //     },
-        //     maxTurns = MaxTurns, maxCalls = MaxCalls, temperature = 0,
-        //     instructions = Instructions, assessmentSchema = AssessmentSchema,
-        //     scorer = "Exact fixture fields; arrays are unordered but duplicates fail. Summary is not scored.",
-        //     timing = "Model loop only; excludes MCP startup and tool discovery. Includes provider requests, local MCP calls and serialization."
-        // }, Json));
+        var output = Path.Combine(ResultsDirectory(), $"live-{variant}-{DateTime.Now:yyyyMMdd-HHmmss}");
+        Directory.CreateDirectory(output);
+        AnsiConsole.MarkupLineInterpolated($"[grey]{DateTime.Now:HH:mm:ss} {variant} tools, {provider}/{model}, {repetitions} repetition(s) -> {output}[/]");
+
+        using var chatClient = (provider == "openai"
+                ? new OpenAI.OpenAIClient(key).GetChatClient(model).AsIChatClient()
+                : new AnthropicClient(new ClientOptions { ApiKey = key }).AsIChatClient(model))
+            .AsBuilder()
+            .Use(getResponseFunc: LogModelCallAsync, getStreamingResponseFunc: null)
+            .Build();
 
         using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(30));
-        await using var granular = await Server.ConnectAsync("granular", timeout.Token);
-        // await using var focused = await Server.ConnectAsync("focused", timeout.Token);
-        var tools = await granular.ListToolsAsync(cancellationToken: timeout.Token);
-        
-        // var tools = new Dictionary<string, IList<McpClientTool>>
-        // {
-        //     ["granular"] = await granular.ListToolsAsync(cancellationToken: timeout.Token),
-        //     ["focused"] = await focused.ListToolsAsync(cancellationToken: timeout.Token)
-        // };
-        
-        // await File.WriteAllTextAsync(Path.Combine(output, "tools.json"), JsonSerializer.Serialize(
-        //     tools.ToDictionary(pair => pair.Key, pair => pair.Value.Select(tool => new
-        //     {
-        //         tool.Name, tool.Description, parameters = tool.JsonSchema
-        //     })), Json));
+        await using var server = await Server.ConnectAsync(variant, timeout.Token);
+        var tools = await server.ListToolsAsync(cancellationToken: timeout.Token);
+
+        var passed = 0;
+        var total = 0;
         for (var repeat = 0; repeat < repetitions; repeat++)
-        foreach (var scenario in Domain.Cases)
         {
-            // string[] variants = (repeat + index) % 2 == 0 ? ["granular", "focused"] : ["focused", "granular"];
-            // foreach (var variant in variants)
-            // {
-            // var client = variant == "granular" ? granular : focused;
+            foreach (var scenario in Domain.Cases)
+            {
+                AnsiConsole.MarkupLineInterpolated($"[grey]{DateTime.Now:HH:mm:ss} START {scenario.OrderId} #{repeat + 1} {scenario.Scenario}[/]");
                 
-            var result = await RunCaseAsync(charClient, granular, tools, model, scenario, repeat, timeout.Token);
+                var result = await RunCaseAsync(chatClient, server, tools, model, scenario, repeat, timeout.Token);
+                var path = Path.Combine(output, $"{repeat + 1}-{scenario.OrderId}.json");
+                await File.WriteAllTextAsync(path, result.ToJsonString(Json), timeout.Token);
+
+                total++;
                 
-            // var path = Path.Combine(output, $"{repeat + 1}-{scenario.OrderId}-{variant}.json");
-            var path = Path.Combine(output, $"{repeat + 1}-{scenario.OrderId}.json");
-            await File.WriteAllTextAsync(path, result.ToJsonString(Json), timeout.Token);
-            // Console.WriteLine($"{scenario.OrderId} {variant} repeat {repeat + 1}: pass={result["passed"]}, calls={result["toolCalls"]}, turns={result["modelTurns"]}");
-            Console.WriteLine($"{scenario.OrderId} repeat {repeat + 1}: pass={result["passed"]}, calls={result["toolCalls"]}, turns={result["modelTurns"]}");
+                var ok = result["passed"]!.GetValue<bool>();
+                if (ok) passed++;
                 
-            if (result["infrastructureError"] is not null) throw new InvalidOperationException("Evaluation stopped after an infrastructure error; the failed run was saved. Fix connectivity/access and use a new output directory.");
+                var stats = $"{result["toolCalls"]} calls, {result["modelTurns"]} turns, {result["elapsedMs"]!.GetValue<double>() / 1000:0.00}s";
+                var reason = result["failure"]?.GetValue<string>()
+                             ?? (result["mismatches"]!.AsArray().Count > 0 ? "wrong: " + string.Join(", ", result["mismatches"]!.AsArray()) : "");
+                
+                var (color, label) = ok ? ("green", "PASS") : ("red", "FAIL");
+                AnsiConsole.MarkupLineInterpolated($"[grey]{DateTime.Now:HH:mm:ss}[/] [{color}]{label}[/] {scenario.OrderId} #{repeat + 1} [grey]{stats}[/] [red]{reason}[/]");
+            }
         }
+
+        AnsiConsole.MarkupLineInterpolated($"[grey]{DateTime.Now:HH:mm:ss}[/] [{(passed == total ? "green" : "yellow")}]Passed {passed}/{total}[/]");
     }
+
+    // Example middleware hook: every model request and response passes through here.
+    private static async Task<ChatResponse> LogModelCallAsync(IEnumerable<ChatMessage> messages, ChatOptions? options,
+        IChatClient inner, CancellationToken token)
+    {
+        var watch = Stopwatch.StartNew();
+        var response = await inner.GetResponseAsync(messages, options, token);
+        var calls = response.Messages.SelectMany(m => m.Contents).OfType<FunctionCallContent>().Select(c => c.Name).ToArray();
+        AnsiConsole.MarkupLineInterpolated(
+            $"[grey]         -> {watch.Elapsed.TotalSeconds:0.00}s, {response.Usage?.InputTokenCount} in / {response.Usage?.OutputTokenCount} out tokens, {(calls.Length > 0 ? string.Join(", ", calls) : "answer")}[/]");
+        return response;
+    }
+
+    // Anchored to the source tree so runs land in <repo>/results whatever the working directory is.
+    private static string ResultsDirectory([CallerFilePath] string source = "")
+        => Path.GetFullPath(Path.Combine(Path.GetDirectoryName(source)!, "..", "results"));
 
     private static async Task<JsonObject> RunCaseAsync(IChatClient chat, McpClient client, IList<McpClientTool> tools,
         string model, SupportCase scenario, int repeat, CancellationToken token)
     {
-        List<ChatMessage> input =   
+        List<ChatMessage> input =
         [
             new (ChatRole.User, $"What is happening with order {scenario.OrderId}? What has arrived, what is still outstanding, and when will the rest arrive?")
         ];
@@ -157,105 +152,52 @@ public static class Experiment
             MaxOutputTokens = 1400,
             ResponseFormat = ChatResponseFormat.ForJsonSchema(JsonSerializer.SerializeToElement(AssessmentSchema), "order_assessment")
         };
-        
-        // var trace = new JsonArray();
-        // var watch = Stopwatch.StartNew();
-        // var result = new JsonObject
-        // {
-        //     ["orderId"] = scenario.OrderId, ["scenario"] = scenario.Scenario, ["variant"] = variant,
-        //     ["repeat"] = repeat + 1, ["provider"] = provider, ["model"] = model, ["passed"] = false,
-        //     ["toolCalls"] = 0, ["modelTurns"] = 0, ["inputTokens"] = 0, ["outputTokens"] = 0,
-        //     ["cachedInputTokens"] = 0, ["toolPayloadBytes"] = 0, ["trace"] = trace
-        // };
-        string? result = null;
+
+        var watch = Stopwatch.StartNew();
+        string? answer = null;
         string? failure = null;
-        
+        string[] mismatches = [];
+        var toolCalls = 0;
+        var turns = 0;
+
         try
         {
-            
-            var toolCalls = 0;
-            for (var turn = 0; turn < MaxTurns; turn++)
+            while (turns < MaxTurns && answer is null)
             {
-                // var startedMs = watch.Elapsed.TotalMilliseconds;
+                turns++;
                 var response = await chat.GetResponseAsync(input, options, token);
-                
+
                 var functionCalls = response.Messages
                     .SelectMany(message => message.Contents)
                     .OfType<FunctionCallContent>()
                     .Where(call => !call.InformationalOnly)
                     .ToArray();
-                
-                // Add(result, "modelTurns", 1);
-                // Add(result, "inputTokens", checked((int)(response.Usage?.InputTokenCount ?? 0)));
-                // Add(result, "outputTokens", checked((int)(response.Usage?.OutputTokenCount ?? 0)));
-                // Add(result, "cachedInputTokens", checked((int)(response.Usage?.CachedInputTokenCount ?? 0)));
-                //
-                // trace.Add(new JsonObject
-                // {
-                //     ["kind"] = "model", 
-                //     ["startMs"] = startedMs,
-                //     ["durationMs"] = watch.Elapsed.TotalMilliseconds - startedMs,
-                //     ["response"] = JsonSerializer.SerializeToNode(new
-                //     {
-                //         model = response.ModelId, responseId = response.ResponseId,
-                //         finishReason = response.FinishReason?.ToString(),
-                //         text = response.Text,
-                //         calls = functionCalls.Select(call => new { call.CallId, call.Name, call.Arguments }),
-                //         usage = new
-                //         {
-                //             inputTokens = response.Usage?.InputTokenCount,
-                //             outputTokens = response.Usage?.OutputTokenCount,
-                //             cachedInputTokens = response.Usage?.CachedInputTokenCount
-                //         }
-                //     }, Json)
-                // });
-                
+
                 input.AddRange(response.Messages);
                 if (functionCalls is {Length: 0})
                 {
-                    result = response.Text;
-                    var mismatches = PassExpected(result, scenario.Expected);
-                    // result["mismatches"] = JsonSerializer.SerializeToNode(mismatches);
-                    // result["passed"] = mismatches.Length == 0;
-                    break;
+                    answer = response.Text;
+                    mismatches = Mismatches(answer, scenario.Expected);
+                    continue;
                 }
-                
+
                 if (toolCalls + functionCalls.Length > MaxCalls)
                 {
                     failure = "Tool call budget exhausted.";
                     break;
                 }
-                
-                // Calls from one model turn may execute together, preserving the granular design's parallelism.
-                await Task.WhenAll(functionCalls.Select(async call =>
+
+                input.AddRange(await Task.WhenAll(functionCalls.Select(async call =>
                 {
-                    // var started = watch.Elapsed.TotalMilliseconds;
                     var arguments = call.Arguments?.ToDictionary() ?? [];
                     var toolResult = await client.CallToolAsync(call.Name, arguments, cancellationToken: token);
-                    // var payload = JsonSerializer.Serialize(new
-                    // {
-                    //     isError = toolResult.IsError,
-                    //     content = toolResult.Content
-                    // }, new JsonSerializerOptions(JsonSerializerDefaults.Web));
-                    
-                    input.Add(toolResult.ToChatMessage(call.CallId));
-                    
-                    // return (Call: call, Payload: payload, Started: started, Duration: watch.Elapsed.TotalMilliseconds - started);
-                }));
-                
+                    return toolResult.ToChatMessage(call.CallId);
+                })));
+
                 toolCalls += functionCalls.Length;
-                // foreach (var call in completed)
-                // {
-                //     Add(result, "toolCalls", 1);
-                //     Add(result, "toolPayloadBytes", Encoding.UTF8.GetByteCount(call.Payload));
-                //     trace.Add(new JsonObject { ["kind"] = "tool", ["startMs"] = call.Started, ["durationMs"] = call.Duration,
-                //         ["name"] = call.Call.Name, ["arguments"] = JsonSerializer.SerializeToNode(call.Call.Arguments, Json), ["output"] = call.Payload });
-                //     input.Add(new ChatMessage(ChatRole.Tool, [new FunctionResultContent(call.Call.CallId, call.Payload)]));
-                // }
             }
-            
-            if (result is null && failure is null) failure = "Model turn budget exhausted.";
-            // if (result["answer"] is null && result["failure"] is null) result["failure"] = "Model turn budget exhausted.";
+
+            if (answer is null && failure is null) failure = "Model turn budget exhausted.";
         }
         catch (JsonException)
         {
@@ -263,116 +205,42 @@ public static class Experiment
         }
         catch (McpException)
         {
-            failure = "MCP request failed; inspect the preceding model response in the trace.";
+            failure = "MCP request failed.";
         }
         catch (Exception ex)
         {
-            // Provider exceptions may carry request details. Persist only the type.
-            failure = ex.GetType().Name;
+            // Provider exceptions may carry request details. Persist only the type and HTTP status.
+            failure = ex is System.ClientModel.ClientResultException { Status: > 0 } http ? $"{ex.GetType().Name} {http.Status}" : ex.GetType().Name;
         }
-        
-        // result["elapsedMs"] = Math.Round(watch.Elapsed.TotalMilliseconds, 2);
-        return new JsonObject();
+
+        return new JsonObject
+        {
+            ["orderId"] = scenario.OrderId, 
+            ["scenario"] = scenario.Scenario, 
+            ["repeat"] = repeat + 1, 
+            ["model"] = model,
+            ["passed"] = failure is null && mismatches.Length == 0,
+            ["mismatches"] = JsonSerializer.SerializeToNode(mismatches), 
+            ["failure"] = failure,
+            ["toolCalls"] = toolCalls, 
+            ["modelTurns"] = turns, 
+            ["elapsedMs"] = Math.Round(watch.Elapsed.TotalMilliseconds, 2),
+            ["answer"] = answer
+        };
     }
 
-    // private static void Add(JsonObject target, string key, int amount) => target[key] = target[key]!.GetValue<int>() + amount;
-
-    private static bool PassExpected(string answer, ExpectedAssessment expected)
+    // Exact fixture fields; arrays are unordered but duplicates fail. Summary is not scored.
+    private static string[] Mismatches(string answer, ExpectedAssessment expected)
     {
-        var wanted = JsonNode.Parse(answer);
-        if (wanted?.GetValueKind() is not JsonValueKind.Object) return false;
+        if (JsonNode.Parse(answer) is not JsonObject actual) return ["answer"];
 
-        var answerObject = wanted.AsObject();
-        
-        var r = JsonSerializer.SerializeToNode(expected, Json)?.AsObject().Where(pair =>
+        return JsonSerializer.SerializeToNode(expected, Json)!.AsObject().Where(pair =>
         {
-            if (!answerObject.ContainsKey(pair.Key)) return true;
-            
-            var actual = answerObject?[pair.Key];
-            if (pair.Value is not JsonArray expectedArray) return !JsonNode.DeepEquals(actual, pair.Value);
-            if (actual is not JsonArray actualArray || actualArray.Any(x => x is not JsonValue value || !value.TryGetValue<string>(out _))) return true;
+            if (!actual.TryGetPropertyValue(pair.Key, out var value)) return true;
+            if (pair.Value is not JsonArray expectedArray) return !JsonNode.DeepEquals(value, pair.Value);
+            if (value is not JsonArray actualArray || actualArray.Any(x => x is not JsonValue item || !item.TryGetValue<string>(out _))) return true;
             return !expectedArray.Select(x => x!.GetValue<string>()).Order(StringComparer.Ordinal)
                 .SequenceEqual(actualArray.Select(x => x!.GetValue<string>()).Order(StringComparer.Ordinal));
-        }).Select(x => x.Key).ToArray();
-        
-        if (r is {Length: > 0}) return false;
-
-        return true;
+        }).Select(pair => pair.Key).ToArray();
     }
-    //
-    // private static void CheckScorer()
-    // {
-    //     var expected = Domain.Cases[3].Expected;
-    //     JsonNode Answer() => JsonSerializer.SerializeToNode(expected, Json)!;
-    //     if (Mismatches(Answer(), expected).Length != 0) throw new InvalidOperationException("Correct answer rejected.");
-    //     foreach (var changed in new[] { "missing", "extra", "duplicate", "eta", "shape" })
-    //     {
-    //         var answer = Answer();
-    //         if (changed == "missing") answer["deliveredSkus"] = new JsonArray();
-    //         if (changed == "extra") answer["delayReasons"]!.AsArray().Add("carrier_delay");
-    //         if (changed == "duplicate") answer["deliveredSkus"]!.AsArray().Add("LAPTOP-14");
-    //         if (changed == "eta") answer["estimatedDeliveryDate"] = "2026-10-09";
-    //         if (changed == "shape") answer["outstandingSkus"] = new JsonArray(42);
-    //         if (Mismatches(answer, expected).Length == 0) throw new InvalidOperationException($"Scorer accepted {changed}.");
-    //     }
-    // }
-
-    // private static async Task CheckLoopAsync()
-    // {
-    //     using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-    //     await using var client = await Server.ConnectAsync("focused", timeout.Token);
-    //     using IChatClient chat = new ScriptedModel();
-    //     var result = await RunCaseAsync(chat, client, await client.ListToolsAsync(cancellationToken: timeout.Token),
-    //         "scripted", "scripted-test-response", Domain.Cases[3], "focused", 0, timeout.Token);
-    //     if (result["passed"]?.GetValue<bool>() != true || result["toolCalls"]?.GetValue<int>() != 1 ||
-    //         result["modelTurns"]?.GetValue<int>() != 2 || result["inputTokens"]?.GetValue<int>() != 20)
-    //         throw new InvalidOperationException("Scripted model/MCP integration check failed.");
-    // }
-
-    // Exercises the adapter without network access. This is a test fixture, never a model benchmark.
-    // private sealed class ScriptedModel : IChatClient
-    // {
-    //     private int requests;
-    //     public Task<ChatResponse> GetResponseAsync(IEnumerable<ChatMessage> messages, ChatOptions? options = null,
-    //         CancellationToken cancellationToken = default)
-    //     {
-    //         ChatMessage message;
-    //         if (requests++ == 0)
-    //         {
-    //             if (options?.Tools?.SingleOrDefault()?.Name != "get_order_support_context")
-    //                 throw new InvalidOperationException("Discovered MCP tool definition was not supplied to the model.");
-    //             message = new ChatMessage(ChatRole.Assistant, [new FunctionCallContent("test-call",
-    //                 "get_order_support_context", new Dictionary<string, object?> { ["orderId"] = "ORD-1004" })]);
-    //         }
-    //         else
-    //         {
-    //             var last = messages.Last().Contents.OfType<FunctionResultContent>().Single();
-    //             var toolOutput = JsonNode.Parse((string)last.Result!)!;
-    //             var facts = JsonNode.Parse(toolOutput["content"]![0]!["text"]!.GetValue<string>())!;
-    //             if (last.CallId != "test-call" ||
-    //                 facts["order"]?["orderId"]?.GetValue<string>() != "ORD-1004" ||
-    //                 facts["tracking"]?[0]?["status"]?.GetValue<string>() != "delivered")
-    //                 throw new InvalidOperationException("Real tool evidence was not returned to the scripted model.");
-    //             var answer = JsonSerializer.SerializeToNode(Domain.Cases[3].Expected, Json)!;
-    //             answer["summary"] = "The laptop arrived; the monitor is backordered, without a delivery estimate.";
-    //             message = new ChatMessage(ChatRole.Assistant, answer.ToJsonString());
-    //         }
-    //         return Task.FromResult(new ChatResponse(message)
-    //         {
-    //             ModelId = "scripted-test-response",
-    //             Usage = new UsageDetails { InputTokenCount = 10, OutputTokenCount = 5 }
-    //         });
-    //     }
-    //
-    //     public async IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(
-    //         IEnumerable<ChatMessage> messages, ChatOptions? options = null,
-    //         [EnumeratorCancellation] CancellationToken cancellationToken = default)
-    //     {
-    //         await Task.CompletedTask;
-    //         yield break;
-    //     }
-    //
-    //     public object? GetService(Type serviceType, object? serviceKey = null) => null;
-    //     public void Dispose() { }
-    // }
 }

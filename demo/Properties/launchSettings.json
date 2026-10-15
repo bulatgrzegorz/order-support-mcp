@@ -3,10 +3,7 @@
   "profiles": {
     "evaluate": {
       "commandName": "Project",
-      "commandLineArgs": "evaluate output12345678",
-      "environmentVariables": {
-        
-      }
+      "commandLineArgs": "evaluate granular 1"
     }
   }
 }

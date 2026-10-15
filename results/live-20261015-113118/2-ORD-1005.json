@@ -1,0 +1,13 @@
+{
+  "orderId": "ORD-1005",
+  "scenario": "Tracking provider unavailable",
+  "repeat": 2,
+  "model": "gpt-4.1-mini-2025-04-14",
+  "passed": false,
+  "mismatches": [],
+  "failure": "ClientResultException",
+  "toolCalls": 4,
+  "modelTurns": 3,
+  "elapsedMs": 2363,
+  "answer": null
+}

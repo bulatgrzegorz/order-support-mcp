@@ -10,6 +10,18 @@ The [blog draft](../../_wip/2026-10-08-one-support-question-too-many-tool-calls.
 - [Partial-delivery trace, SVG](figures/live-order-1004.svg) / [PNG](figures/live-order-1004.png)
 - [Live run artifacts](results/live-local-01/) and [generated summary](results/live-summary.json)
 
+## Quick start
+
+Needs .NET 10 and `OPENAI_API_KEY` (or `ANTHROPIC_API_KEY`) in the environment. Runs make paid model requests.
+
+```console
+dotnet run --project demo -- evaluate                      # granular tools, 3 repetitions
+dotnet run --project demo -- evaluate focused 1            # focused tool, 1 repetition
+dotnet run --project demo -- evaluate granular 3 <model-id> anthropic
+```
+
+Arguments: `[granular|focused] [repetitions=3] [model=gpt-4.1-mini-2025-04-14] [provider=openai|anthropic]`. Each run writes one JSON per case to a new `results/live-<tools>-<timestamp>/` folder. The console logs when each case starts, every model call (duration, tokens, requested tools) and the PASS/FAIL result.
+
 ## Verified
 
 - The .NET project builds with zero warnings and errors using its locked dependencies, including `ModelContextProtocol` 2.2.0. The transport and evaluator self-checks below were repeated after the upgrade.

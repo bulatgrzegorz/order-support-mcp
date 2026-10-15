@@ -1,0 +1,13 @@
+{
+  "orderId": "ORD-1005",
+  "scenario": "Tracking provider unavailable",
+  "repeat": 3,
+  "model": "gpt-4.1-mini-2025-04-14",
+  "passed": true,
+  "mismatches": [],
+  "failure": null,
+  "toolCalls": 4,
+  "modelTurns": 3,
+  "elapsedMs": 3642.04,
+  "answer": "{\u0022deliveredSkus\u0022:[],\u0022outstandingSkus\u0022:[\u0022HEADSET-USB\u0022],\u0022delayReasons\u0022:[\u0022unknown\u0022],\u0022estimatedDeliveryDate\u0022:null,\u0022missingEvidence\u0022:[\u0022tracking:TRK-1005-A\u0022],\u0022summary\u0022:\u0022The order ORD-1005 contains 2 units of HEADSET-USB. Payment has been captured and the items have been dispatched from the warehouse. However, carrier tracking information is currently unavailable, so we cannot confirm delivery or provide an estimated delivery date. The entire order is still outstanding due to this uncertainty.\u0022}"
+}

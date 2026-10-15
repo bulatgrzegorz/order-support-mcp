@@ -2,21 +2,17 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Client;
-using ModelContextProtocol.Protocol;
 
 switch (args.FirstOrDefault())
 {
     case "serve" when args is [_, "granular" or "focused"]:
         await Server.RunAsync(args[1]);
         break;
-    case "check" when args is {Length: 1} or [_, "--output", _]:
-        await Checks.RunAsync(args is {Length: 3} ? args[2] : null);
-        break;
     case "evaluate":
         await Experiment.RunAsync(args[1..]);
         break;
     default:
-        Console.Error.WriteLine("Usage: dotnet run -- serve granular|focused | check [--output PATH] | evaluate [options]");
+        Console.Error.WriteLine("Usage: dotnet run -- evaluate [granular|focused] [repetitions] [model] [provider]");
         Environment.ExitCode = 1;
         break;
 }
@@ -52,7 +48,4 @@ public static class Server
         });
         return McpClient.CreateAsync(transport, cancellationToken: cancellationToken);
     }
-
-    public static string ResultJson(CallToolResult result)
-        => result.Content.OfType<TextContentBlock>().Single().Text;
 }

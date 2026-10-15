@@ -1,0 +1,13 @@
+{
+  "orderId": "ORD-1003",
+  "scenario": "Carrier delay with a revised estimate",
+  "repeat": 2,
+  "model": "gpt-4.1-mini-2025-04-14",
+  "passed": true,
+  "mismatches": [],
+  "failure": null,
+  "toolCalls": 4,
+  "modelTurns": 3,
+  "elapsedMs": 3450.18,
+  "answer": "{\u0022deliveredSkus\u0022:[],\u0022outstandingSkus\u0022:[\u0022KEYBOARD-US\u0022],\u0022delayReasons\u0022:[\u0022carrier_delay\u0022],\u0022estimatedDeliveryDate\u0022:\u00222026-10-10\u0022,\u0022missingEvidence\u0022:[],\u0022summary\u0022:\u0022The order ORD-1003 contains 3 units of the SKU KEYBOARD-US. None of these units have been delivered yet. The payment is complete and the items have been dispatched from the warehouse. However, the delivery is currently delayed due to a weather disruption at the regional sorting hub. The new estimated delivery date for the remaining items is October 10, 2026.\u0022}"
+}

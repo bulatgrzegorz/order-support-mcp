@@ -1,0 +1,13 @@
+{
+  "orderId": "ORD-1006",
+  "scenario": "Stale order status after confirmed delivery",
+  "repeat": 2,
+  "model": "gpt-4.1-mini-2025-04-14",
+  "passed": true,
+  "mismatches": [],
+  "failure": null,
+  "toolCalls": 4,
+  "modelTurns": 3,
+  "elapsedMs": 3309.13,
+  "answer": "{\u0022deliveredSkus\u0022:[\u0022WEBCAM-HD\u0022],\u0022outstandingSkus\u0022:[],\u0022delayReasons\u0022:[],\u0022estimatedDeliveryDate\u0022:null,\u0022missingEvidence\u0022:[],\u0022summary\u0022:\u0022The order ORD-1006 contained 1 unit of the SKU WEBCAM-HD. This item has been fully delivered as confirmed by the carrier\u0027s latest event. There are no outstanding items or delays for this order, and the entire order is complete.\u0022}"
+}

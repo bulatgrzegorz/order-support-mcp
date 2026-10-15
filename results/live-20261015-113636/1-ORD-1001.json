@@ -1,0 +1,13 @@
+{
+  "orderId": "ORD-1001",
+  "scenario": "Payment awaiting capture",
+  "repeat": 1,
+  "model": "gpt-4.1-mini-2025-04-14",
+  "passed": true,
+  "mismatches": [],
+  "failure": null,
+  "toolCalls": 3,
+  "modelTurns": 3,
+  "elapsedMs": 3887.16,
+  "answer": "{\u0022deliveredSkus\u0022:[],\u0022outstandingSkus\u0022:[\u0022MONITOR-27\u0022],\u0022delayReasons\u0022:[\u0022payment_pending\u0022],\u0022estimatedDeliveryDate\u0022:null,\u0022missingEvidence\u0022:[],\u0022summary\u0022:\u0022The order ORD-1001 contains 2 units of MONITOR-27. None of the items have been delivered yet. The payment for the order is still pending capture, which is preventing dispatch. The items are ready for dispatch in the warehouse but cannot be shipped until payment is completed. Therefore, the delivery date is currently unknown.\u0022}"
+}

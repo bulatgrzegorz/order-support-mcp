@@ -1,0 +1,13 @@
+{
+  "orderId": "ORD-1002",
+  "scenario": "Stock shortage",
+  "repeat": 1,
+  "model": "gpt-4.1-mini-2025-04-14",
+  "passed": true,
+  "mismatches": [],
+  "failure": null,
+  "toolCalls": 1,
+  "modelTurns": 2,
+  "elapsedMs": 2136.14,
+  "answer": "{\u0022deliveredSkus\u0022:[],\u0022outstandingSkus\u0022:[\u0022DOCK-USB-C\u0022],\u0022delayReasons\u0022:[\u0022stock_shortage\u0022],\u0022estimatedDeliveryDate\u0022:null,\u0022missingEvidence\u0022:[],\u0022summary\u0022:\u0022The order ORD-1002 has not yet been delivered. The item DOCK-USB-C is still outstanding due to a stock shortage. Payment has been completed, but the item is backordered, so there is no estimated delivery date available at this time.\u0022}"
+}

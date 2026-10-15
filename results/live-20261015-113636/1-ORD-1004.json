@@ -1,0 +1,13 @@
+{
+  "orderId": "ORD-1004",
+  "scenario": "Partial delivery with a backordered item",
+  "repeat": 1,
+  "model": "gpt-4.1-mini-2025-04-14",
+  "passed": true,
+  "mismatches": [],
+  "failure": null,
+  "toolCalls": 5,
+  "modelTurns": 3,
+  "elapsedMs": 3480.39,
+  "answer": "{\u0022deliveredSkus\u0022:[\u0022LAPTOP-14\u0022],\u0022outstandingSkus\u0022:[\u0022MONITOR-27\u0022],\u0022delayReasons\u0022:[\u0022stock_shortage\u0022],\u0022estimatedDeliveryDate\u0022:null,\u0022missingEvidence\u0022:[],\u0022summary\u0022:\u0022The laptop (SKU LAPTOP-14) from your order ORD-1004 has been delivered. However, the monitor (SKU MONITOR-27) is still outstanding due to a stock shortage. There is currently no estimated delivery date available for the monitor. We will update you as soon as more information is available.\u0022}"
+}

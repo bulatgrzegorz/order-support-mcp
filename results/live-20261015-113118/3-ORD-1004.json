@@ -1,0 +1,13 @@
+{
+  "orderId": "ORD-1004",
+  "scenario": "Partial delivery with a backordered item",
+  "repeat": 3,
+  "model": "gpt-4.1-mini-2025-04-14",
+  "passed": false,
+  "mismatches": [],
+  "failure": "ClientResultException",
+  "toolCalls": 5,
+  "modelTurns": 3,
+  "elapsedMs": 2710.89,
+  "answer": null
+}

@@ -1,0 +1,13 @@
+{
+  "orderId": "ORD-1002",
+  "scenario": "Stock shortage",
+  "repeat": 3,
+  "model": "gpt-4.1-mini-2025-04-14",
+  "passed": false,
+  "mismatches": [],
+  "failure": "ClientResultException",
+  "toolCalls": 3,
+  "modelTurns": 3,
+  "elapsedMs": 2325.55,
+  "answer": null
+}
