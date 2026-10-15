@@ -1,0 +1,96 @@
+{
+  "granular": [
+    {
+      "type": "function",
+      "name": "get_tracking",
+      "description": "Get one linked shipment\u0027s SKU, units, carrier status, latest event, estimate and timestamps. Availability unavailable means carrier evidence could not be retrieved; null status is unknown, not proof of a delay or delivery.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "trackingId": {
+            "description": "A tracking ID returned by get_order. Read every shipment relevant to the question.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "trackingId"
+        ]
+      },
+      "strict": false
+    },
+    {
+      "type": "function",
+      "name": "get_order",
+      "description": "Get one order\u0027s status, promised delivery date, item quantities and linked payment, reservation and tracking IDs. Follow those IDs with the other tools for payment, warehouse and carrier evidence. Order status may lag carrier updates.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "description": "The order ID, for example ORD-1001.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "orderId"
+        ]
+      },
+      "strict": false
+    },
+    {
+      "type": "function",
+      "name": "get_payment",
+      "description": "Get one linked payment\u0027s capture status and last update. Dispatch requires a captured payment.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "paymentId": {
+            "description": "A payment ID returned by get_order.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "paymentId"
+        ]
+      },
+      "strict": false
+    },
+    {
+      "type": "function",
+      "name": "get_reservation",
+      "description": "Get one linked warehouse reservation: SKU, units, status and last update. Backordered units are not available to dispatch; ready_for_dispatch units are available; dispatched units have left the warehouse.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "reservationId": {
+            "description": "A reservation ID returned by get_order. An order can have more than one.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reservationId"
+        ]
+      },
+      "strict": false
+    }
+  ],
+  "focused": [
+    {
+      "type": "function",
+      "name": "get_order_support_context",
+      "description": "Get the operational evidence for one order-support question: order status, promise, item quantities, linked payment, warehouse reservations and carrier tracking with source timestamps. Order status may lag carrier updates. Dispatch requires captured payment; backordered units are not available, ready_for_dispatch units are available, dispatched units have left the warehouse. Tracking availability unavailable means unknown carrier evidence, not proof of a delay or delivery. Returns facts, not an assessment.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "description": "The order ID, for example ORD-1001.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "orderId"
+        ]
+      },
+      "strict": false
+    }
+  ]
+}

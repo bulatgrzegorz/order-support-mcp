@@ -1,0 +1,17 @@
+{
+  "orderId": "ORD-1001",
+  "scenario": "Payment awaiting capture",
+  "variant": "granular",
+  "repeat": 1,
+  "model": "gpt-4.1-mini-2025-04-14",
+  "passed": false,
+  "toolCalls": 0,
+  "modelTurns": 0,
+  "inputTokens": 0,
+  "outputTokens": 0,
+  "cachedInputTokens": 0,
+  "toolPayloadBytes": 0,
+  "trace": [],
+  "infrastructureError": "HttpRequestException",
+  "elapsedMs": 12.57
+}

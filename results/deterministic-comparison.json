@@ -1,0 +1,55 @@
+{
+  "datasetAsOf": "2026-10-08T12:00:00+00:00",
+  "sdk": "ModelContextProtocol 2.2.0",
+  "method": "Deterministic client retrieves every linked record over MCP stdio; no LLM. Bytes are UTF-8 tool JSON text only, excluding protocol envelopes, schemas and requests.",
+  "results": [
+    {
+      "orderId": "ORD-1001",
+      "scenario": "Payment awaiting capture",
+      "granularCalls": 3,
+      "focusedCalls": 1,
+      "granularPayloadBytes": 501,
+      "focusedPayloadBytes": 554
+    },
+    {
+      "orderId": "ORD-1002",
+      "scenario": "Stock shortage",
+      "granularCalls": 3,
+      "focusedCalls": 1,
+      "granularPayloadBytes": 487,
+      "focusedPayloadBytes": 540
+    },
+    {
+      "orderId": "ORD-1003",
+      "scenario": "Carrier delay with a revised estimate",
+      "granularCalls": 4,
+      "focusedCalls": 1,
+      "granularPayloadBytes": 800,
+      "focusedPayloadBytes": 853
+    },
+    {
+      "orderId": "ORD-1004",
+      "scenario": "Partial delivery with a backordered item",
+      "granularCalls": 5,
+      "focusedCalls": 1,
+      "granularPayloadBytes": 980,
+      "focusedPayloadBytes": 1034
+    },
+    {
+      "orderId": "ORD-1005",
+      "scenario": "Tracking provider unavailable",
+      "granularCalls": 4,
+      "focusedCalls": 1,
+      "granularPayloadBytes": 726,
+      "focusedPayloadBytes": 779
+    },
+    {
+      "orderId": "ORD-1006",
+      "scenario": "Stale order status after confirmed delivery",
+      "granularCalls": 4,
+      "focusedCalls": 1,
+      "granularPayloadBytes": 777,
+      "focusedPayloadBytes": 830
+    }
+  ]
+}

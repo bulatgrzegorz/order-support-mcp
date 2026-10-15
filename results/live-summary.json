@@ -1,0 +1,763 @@
+{
+  "source": "live-local-01",
+  "model": "gpt-4.1-mini-2025-04-14",
+  "createdAt": "2026-10-08T13:44:49.602132+00:00",
+  "repetitions": 3,
+  "caseCount": 6,
+  "scoreDefinition": "Exact fixture fields; arrays are unordered but duplicates fail. Summary is not scored.",
+  "timing": "Model loop only; excludes MCP startup and tool discovery. Includes HTTP, local MCP calls and serialization.",
+  "variants": {
+    "granular": {
+      "runs": 18,
+      "structuredMatches": 18,
+      "toolCalls": {
+        "total": 69,
+        "median": 4.0,
+        "min": 3,
+        "max": 5
+      },
+      "modelTurns": {
+        "total": 54,
+        "median": 3.0,
+        "min": 3,
+        "max": 3
+      },
+      "inputTokens": {
+        "total": 56310,
+        "median": 3160.5,
+        "min": 2908,
+        "max": 3442
+      },
+      "outputTokens": {
+        "total": 3678,
+        "median": 203.5,
+        "min": 180,
+        "max": 227
+      },
+      "cachedInputTokens": {
+        "total": 0,
+        "median": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      "toolPayloadBytes": {
+        "total": 26079,
+        "median": 1525.0,
+        "min": 1024,
+        "max": 1980
+      },
+      "elapsedMs": {
+        "total": 79532.15,
+        "median": 4044.245,
+        "min": 3570.8,
+        "max": 6738.27
+      },
+      "totalTokens": {
+        "total": 59988,
+        "median": 3361.0,
+        "min": 3096,
+        "max": 3669
+      }
+    },
+    "focused": {
+      "runs": 18,
+      "structuredMatches": 18,
+      "toolCalls": {
+        "total": 18,
+        "median": 1.0,
+        "min": 1,
+        "max": 1
+      },
+      "modelTurns": {
+        "total": 36,
+        "median": 2.0,
+        "min": 2,
+        "max": 2
+      },
+      "inputTokens": {
+        "total": 32481,
+        "median": 1832.5,
+        "min": 1638,
+        "max": 2023
+      },
+      "outputTokens": {
+        "total": 2198,
+        "median": 126.0,
+        "min": 100,
+        "max": 144
+      },
+      "cachedInputTokens": {
+        "total": 0,
+        "median": 0.0,
+        "min": 0,
+        "max": 0
+      },
+      "toolPayloadBytes": {
+        "total": 25002,
+        "median": 1456.0,
+        "min": 1009,
+        "max": 1858
+      },
+      "elapsedMs": {
+        "total": 50093.4,
+        "median": 2691.9049999999997,
+        "min": 2234.03,
+        "max": 4002.63
+      },
+      "totalTokens": {
+        "total": 34679,
+        "median": 1953.0,
+        "min": 1746,
+        "max": 2148
+      }
+    }
+  },
+  "medianReductionPercent": {
+    "totalTokens": 41.892293960130914,
+    "elapsedMs": 33.43862698723743
+  },
+  "cases": [
+    {
+      "orderId": "ORD-1001",
+      "granular": {
+        "runs": 3,
+        "structuredMatches": 3,
+        "toolCalls": {
+          "total": 9,
+          "median": 3,
+          "min": 3,
+          "max": 3
+        },
+        "modelTurns": {
+          "total": 9,
+          "median": 3,
+          "min": 3,
+          "max": 3
+        },
+        "inputTokens": {
+          "total": 8724,
+          "median": 2908,
+          "min": 2908,
+          "max": 2908
+        },
+        "outputTokens": {
+          "total": 571,
+          "median": 189,
+          "min": 188,
+          "max": 194
+        },
+        "cachedInputTokens": {
+          "total": 0,
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "toolPayloadBytes": {
+          "total": 3114,
+          "median": 1038,
+          "min": 1038,
+          "max": 1038
+        },
+        "elapsedMs": {
+          "total": 15979.77,
+          "median": 5179.16,
+          "min": 4062.34,
+          "max": 6738.27
+        },
+        "totalTokens": {
+          "total": 9295,
+          "median": 3097,
+          "min": 3096,
+          "max": 3102
+        }
+      },
+      "focused": {
+        "runs": 3,
+        "structuredMatches": 3,
+        "toolCalls": {
+          "total": 3,
+          "median": 1,
+          "min": 1,
+          "max": 1
+        },
+        "modelTurns": {
+          "total": 6,
+          "median": 2,
+          "min": 2,
+          "max": 2
+        },
+        "inputTokens": {
+          "total": 4914,
+          "median": 1638,
+          "min": 1638,
+          "max": 1638
+        },
+        "outputTokens": {
+          "total": 389,
+          "median": 130,
+          "min": 129,
+          "max": 130
+        },
+        "cachedInputTokens": {
+          "total": 0,
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "toolPayloadBytes": {
+          "total": 3069,
+          "median": 1023,
+          "min": 1023,
+          "max": 1023
+        },
+        "elapsedMs": {
+          "total": 9654.27,
+          "median": 2930.26,
+          "min": 2721.38,
+          "max": 4002.63
+        },
+        "totalTokens": {
+          "total": 5303,
+          "median": 1768,
+          "min": 1767,
+          "max": 1768
+        }
+      }
+    },
+    {
+      "orderId": "ORD-1002",
+      "granular": {
+        "runs": 3,
+        "structuredMatches": 3,
+        "toolCalls": {
+          "total": 9,
+          "median": 3,
+          "min": 3,
+          "max": 3
+        },
+        "modelTurns": {
+          "total": 9,
+          "median": 3,
+          "min": 3,
+          "max": 3
+        },
+        "inputTokens": {
+          "total": 8730,
+          "median": 2910,
+          "min": 2910,
+          "max": 2910
+        },
+        "outputTokens": {
+          "total": 575,
+          "median": 193,
+          "min": 186,
+          "max": 196
+        },
+        "cachedInputTokens": {
+          "total": 0,
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "toolPayloadBytes": {
+          "total": 3072,
+          "median": 1024,
+          "min": 1024,
+          "max": 1024
+        },
+        "elapsedMs": {
+          "total": 13595.17,
+          "median": 4443.78,
+          "min": 4026.15,
+          "max": 5125.24
+        },
+        "totalTokens": {
+          "total": 9305,
+          "median": 3103,
+          "min": 3096,
+          "max": 3106
+        }
+      },
+      "focused": {
+        "runs": 3,
+        "structuredMatches": 3,
+        "toolCalls": {
+          "total": 3,
+          "median": 1,
+          "min": 1,
+          "max": 1
+        },
+        "modelTurns": {
+          "total": 6,
+          "median": 2,
+          "min": 2,
+          "max": 2
+        },
+        "inputTokens": {
+          "total": 4917,
+          "median": 1639,
+          "min": 1639,
+          "max": 1639
+        },
+        "outputTokens": {
+          "total": 328,
+          "median": 109,
+          "min": 107,
+          "max": 112
+        },
+        "cachedInputTokens": {
+          "total": 0,
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "toolPayloadBytes": {
+          "total": 3027,
+          "median": 1009,
+          "min": 1009,
+          "max": 1009
+        },
+        "elapsedMs": {
+          "total": 7076.120000000001,
+          "median": 2292.46,
+          "min": 2234.03,
+          "max": 2549.63
+        },
+        "totalTokens": {
+          "total": 5245,
+          "median": 1748,
+          "min": 1746,
+          "max": 1751
+        }
+      }
+    },
+    {
+      "orderId": "ORD-1003",
+      "granular": {
+        "runs": 3,
+        "structuredMatches": 3,
+        "toolCalls": {
+          "total": 12,
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "modelTurns": {
+          "total": 9,
+          "median": 3,
+          "min": 3,
+          "max": 3
+        },
+        "inputTokens": {
+          "total": 9567,
+          "median": 3189,
+          "min": 3189,
+          "max": 3189
+        },
+        "outputTokens": {
+          "total": 644,
+          "median": 212,
+          "min": 211,
+          "max": 221
+        },
+        "cachedInputTokens": {
+          "total": 0,
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "toolPayloadBytes": {
+          "total": 4803,
+          "median": 1601,
+          "min": 1601,
+          "max": 1601
+        },
+        "elapsedMs": {
+          "total": 11596.69,
+          "median": 3889.24,
+          "min": 3769.38,
+          "max": 3938.07
+        },
+        "totalTokens": {
+          "total": 10211,
+          "median": 3401,
+          "min": 3400,
+          "max": 3410
+        }
+      },
+      "focused": {
+        "runs": 3,
+        "structuredMatches": 3,
+        "toolCalls": {
+          "total": 3,
+          "median": 1,
+          "min": 1,
+          "max": 1
+        },
+        "modelTurns": {
+          "total": 6,
+          "median": 2,
+          "min": 2,
+          "max": 2
+        },
+        "inputTokens": {
+          "total": 5586,
+          "median": 1862,
+          "min": 1862,
+          "max": 1862
+        },
+        "outputTokens": {
+          "total": 386,
+          "median": 127,
+          "min": 127,
+          "max": 132
+        },
+        "cachedInputTokens": {
+          "total": 0,
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "toolPayloadBytes": {
+          "total": 4596,
+          "median": 1532,
+          "min": 1532,
+          "max": 1532
+        },
+        "elapsedMs": {
+          "total": 8891.1,
+          "median": 2796.23,
+          "min": 2619.52,
+          "max": 3475.35
+        },
+        "totalTokens": {
+          "total": 5972,
+          "median": 1989,
+          "min": 1989,
+          "max": 1994
+        }
+      }
+    },
+    {
+      "orderId": "ORD-1004",
+      "granular": {
+        "runs": 3,
+        "structuredMatches": 3,
+        "toolCalls": {
+          "total": 15,
+          "median": 5,
+          "min": 5,
+          "max": 5
+        },
+        "modelTurns": {
+          "total": 9,
+          "median": 3,
+          "min": 3,
+          "max": 3
+        },
+        "inputTokens": {
+          "total": 10326,
+          "median": 3442,
+          "min": 3442,
+          "max": 3442
+        },
+        "outputTokens": {
+          "total": 681,
+          "median": 227,
+          "min": 227,
+          "max": 227
+        },
+        "cachedInputTokens": {
+          "total": 0,
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "toolPayloadBytes": {
+          "total": 5940,
+          "median": 1980,
+          "min": 1980,
+          "max": 1980
+        },
+        "elapsedMs": {
+          "total": 13543.52,
+          "median": 4388.88,
+          "min": 3866.49,
+          "max": 5288.15
+        },
+        "totalTokens": {
+          "total": 11007,
+          "median": 3669,
+          "min": 3669,
+          "max": 3669
+        }
+      },
+      "focused": {
+        "runs": 3,
+        "structuredMatches": 3,
+        "toolCalls": {
+          "total": 3,
+          "median": 1,
+          "min": 1,
+          "max": 1
+        },
+        "modelTurns": {
+          "total": 6,
+          "median": 2,
+          "min": 2,
+          "max": 2
+        },
+        "inputTokens": {
+          "total": 6069,
+          "median": 2023,
+          "min": 2023,
+          "max": 2023
+        },
+        "outputTokens": {
+          "total": 363,
+          "median": 119,
+          "min": 119,
+          "max": 125
+        },
+        "cachedInputTokens": {
+          "total": 0,
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "toolPayloadBytes": {
+          "total": 5574,
+          "median": 1858,
+          "min": 1858,
+          "max": 1858
+        },
+        "elapsedMs": {
+          "total": 8046.68,
+          "median": 2831.83,
+          "min": 2299.18,
+          "max": 2915.67
+        },
+        "totalTokens": {
+          "total": 6432,
+          "median": 2142,
+          "min": 2142,
+          "max": 2148
+        }
+      }
+    },
+    {
+      "orderId": "ORD-1005",
+      "granular": {
+        "runs": 3,
+        "structuredMatches": 3,
+        "toolCalls": {
+          "total": 12,
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "modelTurns": {
+          "total": 9,
+          "median": 3,
+          "min": 3,
+          "max": 3
+        },
+        "inputTokens": {
+          "total": 9420,
+          "median": 3140,
+          "min": 3140,
+          "max": 3140
+        },
+        "outputTokens": {
+          "total": 667,
+          "median": 220,
+          "min": 220,
+          "max": 227
+        },
+        "cachedInputTokens": {
+          "total": 0,
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "toolPayloadBytes": {
+          "total": 4446,
+          "median": 1482,
+          "min": 1482,
+          "max": 1482
+        },
+        "elapsedMs": {
+          "total": 13750.04,
+          "median": 4573.58,
+          "min": 3798.83,
+          "max": 5377.63
+        },
+        "totalTokens": {
+          "total": 10087,
+          "median": 3360,
+          "min": 3360,
+          "max": 3367
+        }
+      },
+      "focused": {
+        "runs": 3,
+        "structuredMatches": 3,
+        "toolCalls": {
+          "total": 3,
+          "median": 1,
+          "min": 1,
+          "max": 1
+        },
+        "modelTurns": {
+          "total": 6,
+          "median": 2,
+          "min": 2,
+          "max": 2
+        },
+        "inputTokens": {
+          "total": 5436,
+          "median": 1812,
+          "min": 1812,
+          "max": 1812
+        },
+        "outputTokens": {
+          "total": 426,
+          "median": 141,
+          "min": 141,
+          "max": 144
+        },
+        "cachedInputTokens": {
+          "total": 0,
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "toolPayloadBytes": {
+          "total": 4239,
+          "median": 1413,
+          "min": 1413,
+          "max": 1413
+        },
+        "elapsedMs": {
+          "total": 8709.380000000001,
+          "median": 2988.65,
+          "min": 2468.77,
+          "max": 3251.96
+        },
+        "totalTokens": {
+          "total": 5862,
+          "median": 1953,
+          "min": 1953,
+          "max": 1956
+        }
+      }
+    },
+    {
+      "orderId": "ORD-1006",
+      "granular": {
+        "runs": 3,
+        "structuredMatches": 3,
+        "toolCalls": {
+          "total": 12,
+          "median": 4,
+          "min": 4,
+          "max": 4
+        },
+        "modelTurns": {
+          "total": 9,
+          "median": 3,
+          "min": 3,
+          "max": 3
+        },
+        "inputTokens": {
+          "total": 9543,
+          "median": 3181,
+          "min": 3181,
+          "max": 3181
+        },
+        "outputTokens": {
+          "total": 540,
+          "median": 180,
+          "min": 180,
+          "max": 180
+        },
+        "cachedInputTokens": {
+          "total": 0,
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "toolPayloadBytes": {
+          "total": 4704,
+          "median": 1568,
+          "min": 1568,
+          "max": 1568
+        },
+        "elapsedMs": {
+          "total": 11066.960000000001,
+          "median": 3714.78,
+          "min": 3570.8,
+          "max": 3781.38
+        },
+        "totalTokens": {
+          "total": 10083,
+          "median": 3361,
+          "min": 3361,
+          "max": 3361
+        }
+      },
+      "focused": {
+        "runs": 3,
+        "structuredMatches": 3,
+        "toolCalls": {
+          "total": 3,
+          "median": 1,
+          "min": 1,
+          "max": 1
+        },
+        "modelTurns": {
+          "total": 6,
+          "median": 2,
+          "min": 2,
+          "max": 2
+        },
+        "inputTokens": {
+          "total": 5559,
+          "median": 1853,
+          "min": 1853,
+          "max": 1853
+        },
+        "outputTokens": {
+          "total": 306,
+          "median": 100,
+          "min": 100,
+          "max": 106
+        },
+        "cachedInputTokens": {
+          "total": 0,
+          "median": 0,
+          "min": 0,
+          "max": 0
+        },
+        "toolPayloadBytes": {
+          "total": 4497,
+          "median": 1499,
+          "min": 1499,
+          "max": 1499
+        },
+        "elapsedMs": {
+          "total": 7715.849999999999,
+          "median": 2548.95,
+          "min": 2504.47,
+          "max": 2662.43
+        },
+        "totalTokens": {
+          "total": 5865,
+          "median": 1953,
+          "min": 1953,
+          "max": 1959
+        }
+      }
+    }
+  ]
+}
